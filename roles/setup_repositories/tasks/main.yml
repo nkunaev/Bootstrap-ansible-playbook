@@ -1,0 +1,8 @@
+---
+- name: Create lower case distribution variable
+  ansible.builtin.set_fact:
+    lower_case_distribution: "{{ ansible_distribution.split(' ')[0] | lower }}"
+
+- name: Configure repositories for deb-based OS
+  ansible.builtin.include_tasks: deb_based.yml
+  when: lower_case_distribution in ['ubuntu', 'debian']

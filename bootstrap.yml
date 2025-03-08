@@ -1,0 +1,37 @@
+---
+- hosts: all
+  gather_facts: true
+  become: true
+  vars_prompt:
+
+    - name: username
+      prompt: What is your username?
+      private: false
+
+    - name: sudo_password
+      prompt: What is your password?
+      private: true
+      encrypt: sha512_crypt
+      confirm: true
+      salt_size: "{{ 15 | random(seed=16) }}"
+
+  roles:
+    - role: setup_repositories
+      tags:
+        - repo
+        - always
+
+    - role: install_ca_certificates
+      tags:
+        - cert
+        - always
+
+    - role: install_base_packages
+      tags:
+        - packages
+        - always
+
+    - role: configure_system
+      tags:
+        - packages
+        - always

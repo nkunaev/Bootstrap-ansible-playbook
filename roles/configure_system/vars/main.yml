@@ -1,0 +1,46 @@
+timezone: "Europe/Moscow"
+ntp:
+  main_server: "server 0.ru.pool.ntp.org"
+  fallback_servers: "server 1.ru.pool.ntp.org server 2.ru.pool.ntp.org server 3.ru.pool.ntp.org"
+
+ssh_config:
+  - name: enable_rsa_keys.conf
+    content: |
+      HostKeyAlgorithms +ssh-rsa
+      PubkeyAcceptedKeyTypes +ssh-rsa
+  - name: 10-defaults.conf
+    content: |
+      PermitRootLogin no
+      LoginGraceTime 0
+      PasswordAuthentication no
+
+bashrc_options:
+  - 'source <(kubectl completion bash)'
+  - 'export GPG_TTY=$(tty)'
+  - 'export GIT_SSH_COMMAND="ssh -i ~/.ssh/id_rsa"'
+
+os:
+  deb_based:
+    sysctl_params:
+      # https://overcast.blog/kernel-tuning-and-optimization-for-kubernetes-a-guide-a3bdc8f7d255
+      # Максимальное количество файловых дескрипторов, которые могут быть открыты системой
+      - name: fs.file-max
+        value: '53846722'
+      # Разрешает маршрутизацию (форвардинг) IP-пакетов между сетевыми интерфейсами
+      - name: net.ipv4.ip_forward
+        value: '1'
+      # Объем памяти (в килобайтах), зарезервированный для системных операций
+      - name: vm.admin_reserve_kbytes
+        value: '512000'
+      # Максимальная длина очереди входящих соединений (для сокетов listen)
+      - name: net.core.somaxconn
+        value: '1024'
+      # Максимум ожиданий для SYN-запросов (полуоткрытых соединений) в моменте. Влияет на производительность TCP-сервера при большом количестве входящих подключений
+      - name: net.ipv4.tcp_max_syn_backlog
+        value: '2048'
+      # Управляет политикой распределения виртуальной памяти. 1 - разрешает выделение памяти выше физически доступной (оверкоммит)
+      - name: vm.overcommit_memory
+        value: '1'
+      # Максимальное количество файлов, за которыми может следить один пользователь
+      - name: fs.inotify.max_user_watches
+        value: '524288'

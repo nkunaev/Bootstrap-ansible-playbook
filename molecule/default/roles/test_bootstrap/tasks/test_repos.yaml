@@ -1,0 +1,11 @@
+---
+- name: Search helm in apt cache
+  ansible.builtin.shell:
+    cmd: "apt-cache search helm | grep -w helm | head -1"
+  register: package_stat_result
+  changed_when: false
+
+- name: Assert helm package in apt cache
+  ansible.builtin.assert:
+    that: "'helm' in package_stat_result.stdout "
+    quiet: true

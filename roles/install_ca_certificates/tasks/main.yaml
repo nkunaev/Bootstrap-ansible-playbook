@@ -1,0 +1,19 @@
+---
+- name: Make sure the folder exists
+  ansible.builtin.file:
+    path: /usr/local/share/ca-certificates
+    state: directory
+    mode: '0644'
+
+- name: Install Russian CA certificates
+  ansible.builtin.get_url:
+    url: "{{ item.0.url }}{{ item.1 }}"
+    dest: "/usr/local/share/ca-certificates/{{ item.1 }}"
+    mode: '0644'
+    validate_certs: false
+  loop: "{{ install_ca_certificates_certificates | subelements('names') }}"
+  notify:
+    - Update CA Trust
+
+- name: Trigger CA Update handlers
+  ansible.builtin.meta: flush_handlers
