@@ -4,11 +4,11 @@
     name: "{{ username }}"
     password: "{{ sudo_password }}"
     create_home: true
-    generate_ssh_key: true
+    generate_ssh_key: "{{ generate_ssh_key }}"
     ssh_key_bits: 2048
     ssh_key_file: .ssh/id_rsa
-    shell: /bin/bash
-    groups: adm,users,sudo,dialout,cdrom,floppy,audio,dip,video,plugdev
+    shell: "{{ user_config.shell }}"
+    groups: "{{ user_config.groups }}"
     append: true
   changed_when: false
 
@@ -17,4 +17,4 @@
     path: "/home/{{ username }}/.bashrc"
     line: "{{ item }}"
     create: yes
-  loop: "{{ bashrc_options }}"
+  loop: "{{ user_config.bashrc_options }}"
