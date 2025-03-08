@@ -1,0 +1,22 @@
+setup_repositories_os_info: "{{ (ansible_distribution + '_' + ansible_distribution_version.replace('.', '_')) | lower }}"
+
+setup_repositories_repositories:
+  ubuntu:
+    - repo: "ppa:ansible/ansible"
+      gpg: ""
+      filename: ansible
+    - repo: "https://baltocdn.com/helm/stable/debian/ all main"
+      gpg: "https://baltocdn.com/helm/signing.asc"
+      filename: helm
+    - repo: "https://download.docker.com/linux/ubuntu noble stable"
+      gpg: "https://download.docker.com/linux/ubuntu/gpg"
+      filename: docker
+    - repo: "https://pkgs.k8s.io/core:/stable:/v1.32/deb/ /"
+      gpg: "https://pkgs.k8s.io/core:/stable:/v1.32/deb/Release.key"
+      filename: kubernetes
+
+setup_repositories_packages:
+  ubuntu:
+    - apt-transport-https
+    - gnupg
+    - curl

@@ -1,0 +1,15 @@
+---
+  - name: Configure system parameters
+    block:
+      - name: Setup /etc/sysctl.d/98-custom.conf parameters
+        ansible.builtin.sysctl:
+          name: "{{ item.name }}"
+          value: "{{ item.value }}"
+          sysctl_file: /etc/sysctl.d/98-custom.conf
+          state: present
+          reload: true
+        loop: "{{ os.deb_based.sysctl_params }}"
+    rescue:
+      - name: Print error
+        ansible.builtin.debug:
+           msg: 'Maybe you try to restart systemd service in container ?'
