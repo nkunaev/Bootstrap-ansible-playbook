@@ -52,7 +52,7 @@ molecule verify
 ## Переменные
 Вы можете переопределить переменные по умолчанию в используя *extra_vars*:  
 ```yaml
-ansible-playbook -i inventory bootstrap.yaml -e @path/to/vars.yaml
+ansible-playbook -i inventory bootstrap.yml -e @path/to/vars.yaml
 ```
 
 ## Лицензия
