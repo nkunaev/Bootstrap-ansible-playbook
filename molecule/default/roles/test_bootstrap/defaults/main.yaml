@@ -1,0 +1,6 @@
+---
+certificates:
+  - url: "https://gu-st.ru/content/lending/"
+    names:
+      - russian_trusted_root_ca_pem.crt
+      - russian_trusted_sub_ca_pem.crt

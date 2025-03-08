@@ -1,0 +1,45 @@
+---
+- name: Gather the package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Install NTP client
+  when: ('ntp' not in ansible_facts.packages) and
+        ('chrony' not in ansible_facts.packages) and
+        ('systemd-timesyncd' not in ansible_facts.packages)
+
+  block:
+    - name: Install NTP client package
+      ansible.builtin.apt:
+        name: systemd-timesyncd
+        state: present
+
+    - name: Configure Main NTP server
+      ansible.builtin.lineinfile:
+        dest: /etc/systemd/timesyncd.conf
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+        backrefs: false
+        backup: false
+      loop:
+        - regexp: '(?i)^(#*)(\s*)(NTP=.*)'
+          line: 'NTP={{ ntp.main_server }}'
+        - regexp: '(?i)^(#*)(\s*)(FallbackNTP=.*)'
+          line: 'FallbackNTP={{ ntp.fallback_servers }}'
+      register: need_restart
+
+    - name: Restart timesyncd
+      block:
+      - name: Restart timesyncd
+        ansible.builtin.systemd_service:
+          name: systemd-timesyncd.service
+          daemon_reload: true
+          state: restarted
+          enabled: true
+        when: need_restart.changed
+
+      rescue:
+        - name: Print error
+          ansible.builtin.debug:
+              msg: 'Maybe you try to restart systemd service in container ?'

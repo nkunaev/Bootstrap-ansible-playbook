@@ -1,0 +1,20 @@
+---
+- name: Create user
+  ansible.builtin.user:
+    name: "{{ username }}"
+    password: "{{ sudo_password }}"
+    create_home: true
+    generate_ssh_key: "{{ generate_ssh_key }}"
+    ssh_key_bits: 2048
+    ssh_key_file: .ssh/id_rsa
+    shell: "{{ user_config.shell }}"
+    groups: "{{ user_config.groups }}"
+    append: true
+  changed_when: false
+
+- name: Modify user bashrc
+  ansible.builtin.lineinfile:
+    path: "/home/{{ username }}/.bashrc"
+    line: "{{ item }}"
+    create: yes
+  loop: "{{ user_config.bashrc_options }}"

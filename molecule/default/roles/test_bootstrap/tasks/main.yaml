@@ -1,0 +1,12 @@
+---
+- name: Import certificate role tests
+  ansible.builtin.include_tasks: test_certificates.yaml
+
+- name: Import repos role tests
+  ansible.builtin.include_tasks: test_repos.yaml
+
+- name: Import package role tests
+  ansible.builtin.include_tasks: test_package_installation.yaml
+
+- name: Import system configuration role tests
+  ansible.builtin.include_tasks: test_systemcfg.yaml

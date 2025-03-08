@@ -1,0 +1,6 @@
+- name: Install additional packages
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  loop: "{{ install_base_packages_packages[lower_case_distribution] }}"

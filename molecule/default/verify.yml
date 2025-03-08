@@ -1,0 +1,8 @@
+---
+- name: Verify
+  hosts: molecule
+  tasks:
+    - name: "Include bootstrap playbook tests"
+      ansible.builtin.include_role:
+        name: "molecule/default/roles/test_bootstrap"
+        tasks_from: main.yaml

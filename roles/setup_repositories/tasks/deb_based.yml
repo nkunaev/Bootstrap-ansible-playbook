@@ -1,0 +1,93 @@
+---
+- name: Get architecture type
+  ansible.builtin.shell: dpkg --print-architecture
+  register: arch
+  changed_when: false
+
+- name: Create lower case distribution variable
+  ansible.builtin.set_fact:
+    keyring_dir: /etc/apt/keyrings
+    processed_repositories: []
+
+- name: Iterate through repositories
+  ansible.builtin.set_fact:
+    processed_repositories: "{{ processed_repositories + 
+        [
+          {
+            'repo': item.repo,
+            'gpg_options': '' if item.gpg | length == 0 else 'signed-by=' + keyring_dir + '/' + item.filename + '.gpg',
+            'arch_type': 'arch=' + arch.stdout,
+            'filename': item.filename,
+          } 
+        ] 
+      }}"
+  loop: "{{ setup_repositories_repositories[lower_case_distribution] }}"
+
+- name: Debug processed repositories
+  ansible.builtin.debug:
+    var: processed_repositories
+
+- name: Make sure the keyring folder exists
+  ansible.builtin.file:
+    path: "{{ keyring_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Debug repository information for the OS
+  ansible.builtin.debug:
+    msg: "{{ item.repo }}"
+  loop: "{{ setup_repositories_repositories[lower_case_distribution] }}"
+  loop_control:
+    label: "{{ item.filename }}"
+
+- name: Install repositories requred packages
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: true
+  loop: "{{ setup_repositories_packages[lower_case_distribution] }}"
+
+- name: Get GPG keys
+  ansible.builtin.get_url:
+    url: "{{ item.gpg }}"
+    dest: "{{ keyring_dir }}/{{ item.filename }}.asc"
+    mode: "0644"
+  when: item.gpg | length > 0
+  loop: "{{ setup_repositories_repositories[lower_case_distribution] }}"
+  loop_control:
+    label: "{{ item.filename }}"
+
+- name: Find all key files
+  ansible.builtin.find:
+    paths: "{{ keyring_dir }}/"
+    patterns: "*.asc"
+  register: asc_keys
+
+- name: Convert keys from .asc to .gpg
+  ansible.builtin.command:
+    cmd: "gpg --batch --yes --output {{ item.path | regex_replace('.asc$', '.gpg') }} --dearmor {{ item.path }}"
+  with_items: "{{ asc_keys.files }}"
+  when: asc_keys.matched > 0
+  changed_when: false
+
+- name: Add regular repositories
+  ansible.builtin.apt_repository:
+    repo: "deb [ {{ item.arch_type }} {{ item.gpg_options }} ] {{ item.repo }}"
+    filename: "{{ item.filename }}"
+    state: present
+    update_cache: true
+  when: "'ppa' not in item.repo"
+  loop: "{{ processed_repositories }}"
+  loop_control:
+    label: "{{ item.filename }}"
+
+- name: Add ppa repositories
+  ansible.builtin.apt_repository:
+    repo: "{{ item.repo }}"
+    filename: "{{ item.filename }}"
+    state: present
+    update_cache: true
+  when: "'ppa' in item.repo"
+  loop: "{{ processed_repositories }}"
+  loop_control:
+    label: "{{ item.filename }}"

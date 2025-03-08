@@ -1,0 +1,19 @@
+install_base_packages_packages:
+  ubuntu:
+    - dnsutils
+    - iotop
+    - iproute2
+    - libuser
+    - lsof
+    - ncdu
+    - net-tools
+    - parted
+    - sshguard
+    - unzip
+    - wget
+    - bash-completion
+    - helm
+    - ansible
+    - git
+    - netcat-traditional
+    - kubectl

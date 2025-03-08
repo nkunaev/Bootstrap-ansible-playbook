@@ -1,0 +1,12 @@
+---
+- name: Prepare | Install base packages for tests
+  hosts: molecule
+  gather_facts: false
+  tasks:
+    - name: Update repository
+      ansible.builtin.raw: "apt-get update"
+      changed_when: false
+
+    - name: Install base packages required for tests
+      ansible.builtin.raw: "apt-get install -y sudo python3"
+      changed_when: false

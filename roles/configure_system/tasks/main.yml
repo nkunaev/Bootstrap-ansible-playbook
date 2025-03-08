@@ -1,0 +1,12 @@
+---
+- name: Configure system parameters
+  ansible.builtin.include_tasks: configure_system_parameters.yaml
+
+- name: Configure NTP
+  ansible.builtin.include_tasks: configure_ntp.yaml
+
+- name: Configure ssh parameters
+  ansible.builtin.include_tasks: configure_ssh.yaml
+
+- name: Configure user
+  ansible.builtin.include_tasks: configure_user.yaml

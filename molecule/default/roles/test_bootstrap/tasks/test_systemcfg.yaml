@@ -1,0 +1,21 @@
+- name: Gather the package facts
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Assert NTP client installed
+  ansible.builtin.assert:
+    that: ('helm' in ansible_facts.packages) or
+          ('chrony' in ansible_facts.packages) or
+          ('systemd-timesyncd' in ansible_facts.packages) and
+          ('openssh-client' in ansible_facts.packages)
+    quiet: true
+
+- name: Get sysctl files exists and not empty
+  ansible.builtin.stat:
+    path: "/etc/sysctl.d/98-custom.conf"
+  register: status
+
+- name: Assert custom file exist and not empty
+  ansible.builtin.assert:
+    that: (status.stat.exists) and
+          (status.stat.blocks > 2)

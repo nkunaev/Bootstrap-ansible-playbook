@@ -1,0 +1,14 @@
+---
+- name: Get certificates files stat
+  ansible.builtin.stat:
+    path: "/usr/local/share/ca-certificates/{{ item.1 }}"
+  loop: "{{ certificates | subelements('names') }}"
+  register: certs_stat_result
+
+- name: Assert crt exists
+  ansible.builtin.assert:
+    that: "{{ item.stat.exists }}"
+    quiet: true
+  loop: "{{ certs_stat_result.results }}"
+  loop_control:
+    label: "{{ item.item[1] }}"

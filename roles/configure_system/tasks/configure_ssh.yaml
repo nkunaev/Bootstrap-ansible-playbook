@@ -1,0 +1,31 @@
+---
+- name: Install NTP client package
+  ansible.builtin.apt:
+    name: openssh-client
+    state: present
+
+- name: Change SSH settings
+  ansible.builtin.copy:
+    content: "{{ item.content }}"
+    dest: /etc/ssh/ssh_config.d/{{ item.name }}
+    mode: "0600"
+    owner: root
+    group: root
+    force: true
+  loop: "{{ ssh_config }}"
+  register: need_restart
+
+- name: Restart ssh
+  block:
+    - name: Restart SSH
+      ansible.builtin.systemd_service:
+        name: sshd.service
+        daemon_reload: true
+        state: restart
+        enabled: true
+      when: need_restart.changed
+
+  rescue:
+    - name: Print error
+      ansible.builtin.debug:
+          msg: 'Maybe you try to restart systemd service in container ?'
